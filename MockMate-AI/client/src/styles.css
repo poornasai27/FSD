@@ -1,0 +1,487 @@
+:root {
+  color-scheme: light;
+  font-family: Georgia, "Times New Roman", serif;
+  color: #1c160f;
+  background: linear-gradient(180deg, #f8f1e7 0%, #efe2cf 100%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(203, 141, 77, 0.15), transparent 35%),
+    linear-gradient(180deg, #f8f1e7 0%, #efe2cf 100%);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 2.25rem;
+  border-bottom: 1px solid rgba(28, 22, 15, 0.1);
+  background: rgba(255, 248, 240, 0.88);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 24px rgba(79, 54, 24, 0.05);
+}
+
+.brand {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.nav-links,
+.nav-user,
+.row-actions,
+.section-header,
+.question-meta,
+.score-header,
+.card-actions,
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.row-actions {
+  margin: 1rem 0 1.25rem;
+  flex-wrap: wrap;
+}
+
+.page {
+  width: min(1180px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 2rem 0 3rem;
+}
+
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+}
+
+.auth-card,
+.setup-card,
+.panel,
+.stat-card,
+.interview-card,
+.score-card,
+.question-panel,
+.code-panel,
+.hero-panel {
+  background: rgba(255, 252, 247, 0.92);
+  border: 1px solid rgba(28, 22, 15, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(79, 54, 24, 0.08);
+}
+
+.auth-card,
+.setup-card {
+  width: min(720px, 100%);
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.hero-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.hero-panel.compact {
+  margin-bottom: 2rem;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.75rem;
+  color: #9a5e2f;
+}
+
+.stats-grid,
+.card-grid,
+.feedback-grid,
+.two-column,
+.feedback-panels,
+.interview-layout,
+.option-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.stats-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin-bottom: 1.5rem;
+}
+
+.card-grid {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.feedback-grid {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  justify-content: center;
+  align-items: stretch;
+  margin-bottom: 1.5rem;
+}
+
+.two-column,
+.interview-layout.with-code {
+  grid-template-columns: 1.2fr 1fr;
+}
+
+.feedback-panels {
+  grid-template-columns: repeat(2, minmax(320px, 1fr));
+  align-items: start;
+}
+
+.interview-layout.full-width {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.option-grid {
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  margin: 1rem 0 1.5rem;
+}
+
+.auth-form,
+.resume-panel,
+.voice-recorder,
+.recorder-actions {
+  display: grid;
+  gap: 1rem;
+}
+
+.voice-recorder {
+  margin-top: 0.5rem;
+}
+
+.primary-button,
+.secondary-button,
+.danger-button,
+.option-card,
+.upload-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.85rem 1.2rem;
+  cursor: pointer;
+  width: fit-content;
+  max-width: 100%;
+  white-space: nowrap;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease,
+    color 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.primary-button {
+  background: #1c160f;
+  color: #fff7ef;
+  box-shadow: 0 12px 26px rgba(28, 22, 15, 0.18);
+}
+
+.secondary-button {
+  background: #ead8bf;
+  color: #1c160f;
+  border: 1px solid rgba(154, 94, 47, 0.12);
+  box-shadow: 0 10px 22px rgba(154, 94, 47, 0.12);
+}
+
+.danger-button {
+  background: #9e3d2c;
+  color: white;
+  box-shadow: 0 10px 22px rgba(158, 61, 44, 0.2);
+}
+
+.primary-button:hover,
+.secondary-button:hover,
+.danger-button:hover {
+  transform: translateY(-1px);
+}
+
+.primary-button:disabled,
+.secondary-button:disabled,
+.danger-button:disabled,
+.option-card:disabled,
+.upload-box:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+  box-shadow: none;
+}
+
+.option-card,
+.upload-box {
+  background: #f6ebdc;
+  border: 1px solid rgba(28, 22, 15, 0.08);
+  text-align: left;
+}
+
+.option-card.selected {
+  outline: 2px solid #9a5e2f;
+}
+
+.interview-card,
+.score-card,
+.panel,
+.question-panel,
+.code-panel,
+.stat-card {
+  padding: 1.25rem;
+}
+
+.score-card,
+.panel {
+  height: 100%;
+}
+
+.score-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 220px;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.stat-card span {
+  color: rgba(28, 22, 15, 0.8);
+}
+
+.stat-card strong {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.interview-card {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.interview-layout {
+  align-items: start;
+}
+
+.question-panel,
+.code-panel {
+  min-height: 420px;
+}
+
+.answer-box,
+.auth-form input {
+  width: 100%;
+  border-radius: 18px;
+  border: 1px solid rgba(28, 22, 15, 0.15);
+  padding: 0.9rem 1rem;
+  background: white;
+}
+
+.status-pill {
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  text-transform: capitalize;
+  background: #ead8bf;
+}
+
+.status-pill.thinking {
+  background: #f1d5a6;
+}
+
+.status-pill.speaking {
+  background: #d8c3a7;
+}
+
+.status-pill.listening {
+  background: #d5e7d4;
+}
+
+.status-pill.farewell {
+  background: #d4d8e7;
+}
+
+.editor-shell,
+.evaluation-card,
+.resume-preview {
+  border-radius: 20px;
+  overflow: hidden;
+  background: #f8f4ee;
+}
+
+.evaluation-card,
+.resume-preview {
+  padding: 1rem;
+}
+
+.question-panel > h1,
+.hero-panel h1 {
+  max-width: 18ch;
+}
+
+.hero-panel p,
+.question-panel p {
+  max-width: 72ch;
+}
+
+.question-panel > h1 {
+  max-width: none;
+  width: 100%;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.card-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.nav-user {
+  justify-content: flex-end;
+}
+
+.nav-link {
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  color: rgba(28, 22, 15, 0.75);
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  background: rgba(234, 216, 191, 0.78);
+  color: #1c160f;
+  box-shadow: inset 0 0 0 1px rgba(154, 94, 47, 0.1);
+}
+
+.user-chip {
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(255, 252, 247, 0.9);
+  border: 1px solid rgba(28, 22, 15, 0.08);
+}
+
+.audio-preview {
+  width: 100%;
+  max-width: 100%;
+}
+
+.voice-recorder .primary-button,
+.voice-recorder .secondary-button,
+.voice-recorder .danger-button {
+  width: 100%;
+}
+
+.section-header a {
+  color: #9a5e2f;
+}
+
+.inline-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(255, 248, 240, 0.98);
+  border: 1px solid rgba(154, 94, 47, 0.24);
+  box-shadow: 0 10px 18px rgba(154, 94, 47, 0.1);
+  color: #9a5e2f;
+  font-weight: 600;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease;
+}
+
+.inline-link:hover {
+  transform: translateY(-1px);
+  background: #f6ebdc;
+  box-shadow: 0 14px 24px rgba(154, 94, 47, 0.14);
+}
+
+.hint-text {
+  margin-top: 0.75rem;
+  color: #7a5b3d;
+  font-size: 0.95rem;
+}
+
+.link-button {
+  background: transparent;
+  border: 0;
+  color: #9a5e2f;
+  cursor: pointer;
+  padding: 0;
+}
+
+ul {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+@media (max-width: 900px) {
+  .navbar,
+  .hero-panel,
+  .section-header,
+  .question-meta,
+  .nav-links,
+  .nav-user,
+  .row-actions,
+  .pagination {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .two-column,
+  .feedback-panels,
+  .interview-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .interview-card,
+  .stat-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .card-actions {
+    justify-content: flex-start;
+  }
+}
