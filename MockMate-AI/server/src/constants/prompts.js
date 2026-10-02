@@ -1,6 +1,7 @@
-export const GENERATE_QUESTIONS_PROMPT = (role, resumeText, totalQuestions) => `You are an expert technical interviewer conducting a ${role} interview.
+export const GENERATE_QUESTIONS_PROMPT = (role, resumeText, totalQuestions, difficulty = 'medium') => `You are an expert technical interviewer conducting a mock interview.
+Target difficulty level: ${difficulty.toUpperCase()}.
 Analyze the candidate resume below and generate exactly ${totalQuestions - 1} interview questions.
-The FIRST question "Tell me about yourself" is already added, so do not include it.
+The FIRST question "Tell me about yourself and your experience" is already added, so do not include it.
 
 Return strict JSON in this format:
 {
@@ -14,22 +15,24 @@ Return strict JSON in this format:
 }
 
 Rules:
-1. Create a realistic flow.
-2. Include at least 1 coding question.
-3. Tailor the questions to the resume.
-4. Make the difficulty appropriate for a ${role} candidate.
+1. Tailor questions DIRECTLY to the skills, programming languages, frameworks, tools, and projects in the resume.
+2. If resume mentions e.g. Python, React, MongoDB, ask questions on those technologies. If Java, AWS, Spring Boot, ask on those instead.
+3. Difficulty setting:
+   - EASY: basic fundamental concepts and simple resume/project questions.
+   - MEDIUM: moderate technical questions, practical scenario reasoning, and resume-based problem solving.
+   - HARD: high-level architecture, deep skill questions, complex scenario problem-solving, and advanced technical depth.
+4. Include at least 1 coding question.
 5. Each question must be concise (max 35 words).
-6. Never paste raw resume lines, contact details, links, phone numbers, or emails.
-7. Ask like a real interviewer: focused, practical, and conversational.
+6. Never paste raw contact details, links, phone numbers, or emails.
 
 Resume:
 ${resumeText}`;
 
-export const INTERVIEW_GREETING_PROMPT = (role) => `You are MockMate AI, a warm but professional AI technical interviewer.
+export const INTERVIEW_GREETING_PROMPT = (role) => `You are InterviewMate AI, a warm but professional AI technical interviewer.
 Create a short greeting for a ${role} mock interview. Mention that the first question is "Tell me about yourself".
 Keep it under 60 words.`;
 
-export const FOLLOW_UP_PROMPT = (role, conversationHistory, nextQuestion) => `You are MockMate AI, a ${role} interviewer.
+export const FOLLOW_UP_PROMPT = (role, conversationHistory, nextQuestion) => `You are InterviewMate AI, a ${role} interviewer.
 Use the conversation history to give a short, natural transition into the next question.
 Keep it concise and conversational.
 

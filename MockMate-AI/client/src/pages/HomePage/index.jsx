@@ -94,7 +94,13 @@ function HomePage() {
             </div>
 
             <article className="marketing-visual-card">
-              <div className="marketing-media" />
+              <div className="marketing-media">
+                <img
+                  src="/assets/interview-hero.jpg"
+                  alt="InterviewMate AI Candidate Interview Simulation"
+                  className="marketing-media-image"
+                />
+              </div>
               <div className="floating-badge">
                 <span>Success rate</span>
                 <strong>+24% YoY</strong>
@@ -124,8 +130,8 @@ function HomePage() {
               <p>Evaluate cadence, emotional balance, and structural clarity in real time.</p>
             </article>
             <article className="micro-card micro-card-dark">
-              <h3>Adaptive Role Engine</h3>
-              <p>Questions adapt to your role, difficulty, and resume context automatically.</p>
+              <h3>Adaptive Skill Engine</h3>
+              <p>Questions adapt to your resume skills, experience, and difficulty level automatically.</p>
             </article>
             <article className="micro-card">
               <h3>Executive Presence Analytics</h3>
@@ -157,7 +163,7 @@ function HomePage() {
 
           <section className="site-footer-grid">
             <div>
-              <strong>MockMate AI</strong>
+              <strong>InterviewMate AI</strong>
               <p>
                 Professional interview training powered by resume intelligence and deliberate
                 practice loops.
@@ -191,7 +197,27 @@ function HomePage() {
               <p>Your communication effectiveness has increased by 12% this week.</p>
             </div>
             <div className="row-actions">
-              <button type="button" className="secondary-button">Export Report</button>
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={() => {
+                  if (completed.length === 0) {
+                    toast.error('No completed interviews available to export.');
+                    return;
+                  }
+                  const textContent = `InterviewMate AI Progress Report\nCandidate: ${user?.name || 'Candidate'}\nCompleted Sessions: ${completed.length}\nAverage Score: ${averageScore}%\nReadiness Score: ${readinessScore}%\nLatest Session Score: ${recentInterviews[0]?.overallScore || 'N/A'}`;
+                  const blob = new Blob([textContent], { type: 'text/plain' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `InterviewMate_Report_${Date.now()}.txt`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                  toast.success('Interview report exported successfully.');
+                }}
+              >
+                Export Report
+              </button>
               <Link to="/history" className="primary-button">View Analytics</Link>
             </div>
           </section>
@@ -230,18 +256,31 @@ function HomePage() {
               <article className="upcoming-card">
                 <p className="eyebrow">Upcoming session</p>
                 <h3>{upcomingRole}</h3>
-                <p>Tomorrow, 10:00 AM</p>
-                <Link to="/setup" className="secondary-button dark-outline-button">Prepare Dashboard</Link>
+                <p>Practice session ready</p>
+                <Link to="/setup" className="secondary-button dark-outline-button">Prepare Session</Link>
               </article>
 
               <article className="quick-tools-card">
                 <div className="section-header">
                   <h3>Quick Tools</h3>
-                  <span>...</span>
                 </div>
                 <div className="quick-tools-grid">
-                  <div className="quick-tool"><strong>Record</strong></div>
-                  <div className="quick-tool"><strong>Tips</strong></div>
+                  <button
+                    type="button"
+                    className="quick-tool"
+                    onClick={() => navigate('/setup')}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                  >
+                    <strong>New Practice</strong>
+                  </button>
+                  <button
+                    type="button"
+                    className="quick-tool"
+                    onClick={() => toast.success('Pro Tip: Use the STAR method (Situation, Task, Action, Result) when answering scenario questions.')}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                  >
+                    <strong>STAR Tips</strong>
+                  </button>
                 </div>
               </article>
             </div>
@@ -321,7 +360,7 @@ function HomePage() {
 
           <section className="site-footer-grid dashboard-footer">
             <div>
-              <strong>MockMate AI</strong>
+              <strong>InterviewMate AI</strong>
               <p>The professional interview system for narrative precision and technical clarity.</p>
             </div>
             <div>

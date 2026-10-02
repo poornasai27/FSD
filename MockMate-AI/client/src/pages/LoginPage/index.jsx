@@ -39,7 +39,7 @@ function LoginPage() {
     <main className="auth-page">
       <section className="auth-shell">
         <article className="auth-brand-panel">
-          <h1>MockMate AI</h1>
+          <h1>InterviewMate AI</h1>
           <h2>
             {isRegisterMode
               ? 'Master the art of professional interviewing.'
@@ -64,7 +64,7 @@ function LoginPage() {
             </div>
           ) : (
             <blockquote className="auth-quote">
-              "MockMate AI improved how I explain decisions under pressure."
+              "InterviewMate AI improved how I explain decisions under pressure."
             </blockquote>
           )}
         </article>
@@ -134,7 +134,7 @@ function LoginPage() {
       </section>
 
       <footer className="auth-footer">
-        <span>© 2026 MockMate AI. All rights reserved.</span>
+        <span>© 2026 InterviewMate AI. All rights reserved.</span>
         <div>
           <span>Privacy Policy</span>
           <span>Terms</span>

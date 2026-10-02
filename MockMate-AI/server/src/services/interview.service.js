@@ -37,10 +37,17 @@ const safeGenerateAudio = async (text) => {
   }
 };
 
-const createQuestions = async (role, resumeText, totalQuestions) => {
+const getQuestionCountByDifficulty = (difficulty) => {
+  const norm = (difficulty || '').toLowerCase();
+  if (norm === 'easy') return 5;
+  if (norm === 'hard') return 10;
+  return 7; // medium
+};
+
+const createQuestions = async (role, resumeText, totalQuestions, difficulty) => {
   try {
     const response = await askGemini(
-      GENERATE_QUESTIONS_PROMPT(role, resumeText, totalQuestions)
+      GENERATE_QUESTIONS_PROMPT(role, resumeText, totalQuestions, difficulty)
     );
     const parsed = parseGeminiJSON(response);
     return parsed.questions;
@@ -54,7 +61,7 @@ const normalizeQuestions = (questions = [], role, resumeText, totalQuestions) =>
 
   return questions.map((question, index) => {
     const safeText = sanitizeInterviewQuestionText(question?.text || '');
-    const fallbackText = backup[index]?.text || `Can you explain your approach to a ${role} problem from recent experience?`;
+    const fallbackText = backup[index]?.text || `Can you explain your technical approach to a key problem in your resume experience?`;
 
     return {
       text: safeText || fallbackText,
@@ -129,26 +136,29 @@ const buildFeedback = async (interview) => {
 
 export const startInterview = async ({
   userId,
-  role,
+  role = 'Candidate',
   difficulty = 'medium',
   resumeText,
-  totalQuestions = 5,
+  totalQuestions,
 }) => {
-  const generatedQuestions = await createQuestions(role, resumeText, totalQuestions);
+  const targetQuestionsCount = getQuestionCountByDifficulty(difficulty);
+  const effectiveRole = role && role !== 'Select your target' ? role : 'Technical Candidate';
+
+  const generatedQuestions = await createQuestions(effectiveRole, resumeText, targetQuestionsCount, difficulty);
   const safeGeneratedQuestions = normalizeQuestions(
     generatedQuestions,
-    role,
+    effectiveRole,
     resumeText,
-    totalQuestions
+    targetQuestionsCount
   );
   const questions = [
     {
-      text: 'Tell me about yourself.',
+      text: 'Tell me about yourself and your technical background.',
       type: 'behavioral',
       expectedTopics: ['background', 'experience', 'goals'],
     },
     ...safeGeneratedQuestions,
-  ].slice(0, totalQuestions);
+  ].slice(0, targetQuestionsCount);
 
   const greeting = (await createGreeting(role))?.trim() || buildFallbackGreeting(role);
   const introAudio = await safeGenerateAudio(greeting);

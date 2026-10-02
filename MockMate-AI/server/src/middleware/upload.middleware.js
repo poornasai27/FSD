@@ -4,13 +4,23 @@ const storage = multer.memoryStorage();
 
 const resumeUploadMiddleware = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
-    if (file.mimetype !== 'application/pdf') {
-      cb(new Error('Only PDF files are allowed.'));
-      return;
+    const allowedMimeTypes = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/msword',
+      'text/plain',
+      'application/octet-stream',
+    ];
+    const extension = file.originalname.toLowerCase().split('.').pop();
+    const allowedExtensions = ['pdf', 'docx', 'doc', 'txt'];
+
+    if (allowedMimeTypes.includes(file.mimetype) || allowedExtensions.includes(extension)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Unsupported file format. Please upload a PDF, DOC, DOCX, or TXT resume.'));
     }
-    cb(null, true);
   },
 }).single('resume');
 

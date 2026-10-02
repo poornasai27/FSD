@@ -13,7 +13,7 @@ function Navbar() {
     <header className="navbar">
       <Link to="/" className="brand">
         <span className="brand-mark" />
-        <span className="brand-text">MockMate AI</span>
+        <span className="brand-text">InterviewMate AI</span>
       </Link>
       <nav className="nav-links">
         <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>

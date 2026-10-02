@@ -3,21 +3,35 @@ import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { getResume, startInterview, uploadResume } from '../../services/interviewService';
 
-const roles = ['Frontend', 'Backend', 'Full Stack', 'Data Analyst', 'DevOps'];
-const difficultyMap = {
-  easy: 4,
-  medium: 5,
-  hard: 6,
+const difficultyConfig = {
+  easy: {
+    label: 'Easy',
+    questionsCount: 5,
+    description: 'Basic concept & fundamental skill questions.',
+  },
+  medium: {
+    label: 'Medium',
+    questionsCount: 7,
+    description: 'Moderate technical, practical scenario & resume-based questions.',
+  },
+  hard: {
+    label: 'Hard',
+    questionsCount: 10,
+    description: 'High-level technical, deep architecture & scenario problem-solving.',
+  },
 };
+
+const ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docx', 'txt'];
 
 function InterviewSetupPage() {
   const [step, setStep] = useState(1);
-  const [role, setRole] = useState('Full Stack');
   const [difficulty, setDifficulty] = useState('medium');
   const [resumeText, setResumeText] = useState('');
   const [resumeFileName, setResumeFileName] = useState('');
+  const [resumeSkills, setResumeSkills] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [starting, setStarting] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,20 +39,29 @@ function InterviewSetupPage() {
       try {
         const data = await getResume();
         if (data) {
-          setResumeText(data.text);
-          setResumeFileName(data.fileName);
+          setResumeText(data.text || '');
+          setResumeFileName(data.fileName || '');
+          setResumeSkills(data.skills || []);
         }
       } catch (_error) {
-        // No saved resume yet.
+        // No saved resume yet
       }
     };
 
     loadResume();
   }, []);
 
-  const handleFileUpload = async (event) => {
-    const file = event.target.files?.[0];
-    if (!file) {
+  const validateAndProcessFile = async (file) => {
+    if (!file) return;
+
+    const ext = file.name.toLowerCase().split('.').pop();
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      toast.error('Invalid file format. Please upload a PDF, DOC, DOCX, or TXT file.');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('File size exceeds 10MB limit. Please upload a smaller file.');
       return;
     }
 
@@ -47,24 +70,50 @@ function InterviewSetupPage() {
       const data = await uploadResume(file);
       setResumeText(data.text);
       setResumeFileName(data.fileName);
-      toast.success('Resume uploaded successfully.');
+      setResumeSkills(data.skills || []);
+      toast.success('Resume uploaded and analyzed successfully.');
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to upload resume.');
+      toast.error(error.response?.data?.message || 'Failed to parse resume. Please try again.');
     } finally {
       setUploading(false);
     }
   };
 
-  const handleNext = () => {
-    if (step === 1 && !role) {
-      toast.error('Please select a role.');
-      return;
-    }
-    setStep((prev) => Math.min(3, prev + 1));
+  const handleFileSelect = (event) => {
+    const file = event.target.files?.[0];
+    validateAndProcessFile(file);
   };
 
-  const handleBack = () => {
-    setStep((prev) => Math.max(1, prev - 1));
+  const handleDragOver = (event) => {
+    event.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (event) => {
+    event.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (event) => {
+    event.preventDefault();
+    setIsDragOver(false);
+    const file = event.dataTransfer.files?.[0];
+    validateAndProcessFile(file);
+  };
+
+  const handleRemoveResume = () => {
+    setResumeText('');
+    setResumeFileName('');
+    setResumeSkills([]);
+    toast.success('Resume removed.');
+  };
+
+  const handleNextStep = () => {
+    if (!resumeText) {
+      toast.error('Please upload your resume before continuing.');
+      return;
+    }
+    setStep(2);
   };
 
   const handleStartInterview = async () => {
@@ -75,15 +124,15 @@ function InterviewSetupPage() {
 
     setStarting(true);
     try {
+      const targetQuestions = difficultyConfig[difficulty]?.questionsCount || 7;
       const data = await startInterview({
-        role,
         difficulty,
-        totalQuestions: difficultyMap[difficulty],
+        totalQuestions: targetQuestions,
         resumeText,
       });
       navigate(`/interview/${data.interviewId}`, { state: { interviewData: data } });
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to start interview.');
+      toast.error(error.response?.data?.message || 'Failed to start interview. Please try again.');
     } finally {
       setStarting(false);
     }
@@ -94,84 +143,124 @@ function InterviewSetupPage() {
       <section className="setup-header">
         <p className="eyebrow">Preparation module</p>
         <h1>Configure your interview experience</h1>
-        <p>Tailor role, level, and resume context before starting the session.</p>
+        <p>Upload your resume to generate tailored questions, then choose your interview depth.</p>
         <div className="step-rail">
-          {[1, 2, 3].map((index) => (
-            <div key={index} className={`step-dot ${step >= index ? 'active' : ''}`}>
-              {index}
-            </div>
-          ))}
+          <div className={`step-dot ${step >= 1 ? 'active' : ''}`}>1</div>
+          <div className={`step-dot ${step >= 2 ? 'active' : ''}`}>2</div>
         </div>
       </section>
 
       <section className="setup-layout">
         <section className="setup-card">
           <div className="section-header">
-            <h2>
-              {step === 1 && 'Select Target Role'}
-              {step === 2 && 'Choose Interview Depth'}
-              {step === 3 && 'Upload Resume'}
-            </h2>
-            <span>Step {step} of 3</span>
+            <h2>{step === 1 ? 'Upload Your Resume' : 'Choose Interview Depth'}</h2>
+            <span>Step {step} of 2</span>
           </div>
 
           {step === 1 && (
-            <div className="option-grid">
-              {roles.map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  className={`option-card ${role === item ? 'selected' : ''}`}
-                  onClick={() => setRole(item)}
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {step === 2 && (
-            <div className="option-grid">
-              {Object.keys(difficultyMap).map((item) => (
-              <button
-                key={item}
-                type="button"
-                className={`option-card ${difficulty === item ? 'selected' : ''}`}
-                onClick={() => setDifficulty(item)}
-              >
-                <span className="option-title">{item}</span>
-                <small className="option-meta">{difficultyMap[item]} total questions</small>
-              </button>
-            ))}
-          </div>
-          )}
-
-          {step === 3 && (
             <div className="resume-panel">
-              <label className="upload-box">
-                <span>{uploading ? 'Uploading...' : 'Upload PDF resume'}</span>
-                <input type="file" accept="application/pdf" onChange={handleFileUpload} hidden />
-              </label>
+              <div
+                className={`dropzone-box ${isDragOver ? 'drag-over' : ''}`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
+                <p className="dropzone-title">
+                  {uploading ? 'Analyzing resume...' : 'Drag & drop your resume here'}
+                </p>
+                <p className="dropzone-hint">Supported formats: PDF, DOC, DOCX, TXT (Max 10MB)</p>
+                <label className="primary-button browse-btn">
+                  <span>{uploading ? 'Processing...' : 'Browse / Upload File'}</span>
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                    onChange={handleFileSelect}
+                    hidden
+                    disabled={uploading}
+                  />
+                </label>
+              </div>
+
               {resumeFileName && (
-                <div className="resume-preview">
-                  <strong>{resumeFileName}</strong>
+                <div className="resume-preview-card">
+                  <div className="resume-file-info">
+                    <span className="file-icon">📄</span>
+                    <div>
+                      <strong>{resumeFileName}</strong>
+                      <p className="file-status">Resume parsed & ready</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="secondary-button remove-btn"
+                    onClick={handleRemoveResume}
+                    disabled={uploading}
+                  >
+                    Remove / Change File
+                  </button>
+                </div>
+              )}
+
+              {resumeSkills.length > 0 && (
+                <div className="skills-extracted-panel">
+                  <p className="skills-heading">Extracted Skills & Tech Stack:</p>
+                  <div className="skills-chips">
+                    {resumeSkills.map((skill) => (
+                      <span key={skill} className="skill-chip">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
           )}
 
-          <div className="row-actions">
-            <button
-              type="button"
-              className="secondary-button"
-              onClick={handleBack}
-              disabled={step === 1 || starting}
-            >
-              Back
-            </button>
-            {step < 3 ? (
-              <button type="button" className="primary-button" onClick={handleNext} disabled={starting}>
-                Continue
+          {step === 2 && (
+            <div className="depth-option-container">
+              <div className="option-grid depth-grid">
+                {Object.keys(difficultyConfig).map((key) => {
+                  const conf = difficultyConfig[key];
+                  const isSelected = difficulty === key;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      className={`option-card depth-card ${isSelected ? 'selected' : ''}`}
+                      onClick={() => setDifficulty(key)}
+                    >
+                      <div className="depth-card-header">
+                        <span className="option-title">{conf.label}</span>
+                        <span className="badge-count">{conf.questionsCount} Questions</span>
+                      </div>
+                      <p className="option-meta">{conf.description}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <div className="row-actions setup-actions">
+            {step === 2 && (
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={() => setStep(1)}
+                disabled={starting}
+              >
+                Back to Resume
+              </button>
+            )}
+
+            {step === 1 ? (
+              <button
+                type="button"
+                className="primary-button"
+                onClick={handleNextStep}
+                disabled={uploading || !resumeText}
+              >
+                Continue to Depth
               </button>
             ) : (
               <button
@@ -180,7 +269,7 @@ function InterviewSetupPage() {
                 onClick={handleStartInterview}
                 disabled={starting}
               >
-                {starting ? 'Starting...' : 'Start Interview'}
+                {starting ? 'Generating interview questions...' : 'Start Interview'}
               </button>
             )}
           </div>
@@ -188,33 +277,41 @@ function InterviewSetupPage() {
 
         <aside className="setup-side-card">
           <p className="eyebrow">Session preview</p>
-          <h3>MockMate AI interviewer</h3>
-          <div className="setup-side-row">
-            <span>Role</span>
-            <strong>{role}</strong>
-          </div>
-          <div className="setup-side-row">
-            <span>Difficulty</span>
-            <strong>{difficulty}</strong>
-          </div>
-          <div className="setup-side-row">
-            <span>Questions</span>
-            <strong>{difficultyMap[difficulty]}</strong>
-          </div>
+          <h3>InterviewMate AI interviewer</h3>
+
           <div className="setup-side-row">
             <span>Resume</span>
             <strong>{resumeFileName ? 'Uploaded' : 'Required'}</strong>
           </div>
+
+          {resumeSkills.length > 0 && (
+            <div className="setup-side-row">
+              <span>Primary Skills</span>
+              <strong>{resumeSkills.slice(0, 3).join(', ')}</strong>
+            </div>
+          )}
+
+          <div className="setup-side-row">
+            <span>Interview Depth</span>
+            <strong>{difficultyConfig[difficulty]?.label}</strong>
+          </div>
+
+          <div className="setup-side-row">
+            <span>Total Questions</span>
+            <strong>{difficultyConfig[difficulty]?.questionsCount}</strong>
+          </div>
+
           <button
             type="button"
-            className="primary-button"
+            className="primary-button side-start-btn"
             onClick={handleStartInterview}
-            disabled={step !== 3 || !resumeText || starting}
+            disabled={!resumeText || starting}
           >
-            {starting ? 'Starting...' : 'Begin Interview'}
+            {starting ? 'Generating questions...' : 'Begin Interview'}
           </button>
+
           <p className="hint-text">
-            Tip: Upload a concise, clean resume for better personalized questions.
+            Questions will be generated directly from your resume skills and selected difficulty.
           </p>
         </aside>
       </section>

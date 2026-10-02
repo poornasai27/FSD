@@ -4,13 +4,7 @@ import { streamAudio } from '../services/murf.service.js';
 
 export const startInterview = async (req, res, next) => {
   try {
-    const { role, resumeText, totalQuestions, difficulty } = req.body;
-
-    if (!role) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Please select a role for the interview.' });
-    }
+    const { role = 'Candidate', resumeText, totalQuestions, difficulty } = req.body;
 
     if (!resumeText) {
       return res
@@ -20,7 +14,7 @@ export const startInterview = async (req, res, next) => {
 
     const data = await interviewService.startInterview({
       userId: req.user._id,
-      role,
+      role: role || 'Candidate',
       difficulty,
       resumeText,
       totalQuestions,
