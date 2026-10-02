@@ -5,19 +5,11 @@ import errorMiddleware from './middleware/error.middleware.js';
 
 const app = express();
 
-const allowedOrigins = [
-  'http://localhost:5173',
-  'https://fsd-gules.vercel.app',
-];
-
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
+      // Allow requests with no origin (like mobile apps or curl) or any origin
+      callback(null, true);
     },
     credentials: true,
   })
