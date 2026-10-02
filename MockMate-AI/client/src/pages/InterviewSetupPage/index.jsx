@@ -5,19 +5,25 @@ import { getResume, startInterview, uploadResume } from '../../services/intervie
 
 const difficultyConfig = {
   easy: {
-    label: 'Easy',
+    label: 'EASY',
+    badge: '5 Qs',
     questionsCount: 5,
-    description: 'Basic concept & fundamental skill questions.',
+    tagline: 'Simple / Basic',
+    description: 'Basic concept questions & fundamental resume-based skills.',
   },
   medium: {
-    label: 'Medium',
+    label: 'MEDIUM',
+    badge: '7 Qs',
     questionsCount: 7,
-    description: 'Moderate technical, practical scenario & resume-based questions.',
+    tagline: 'Moderate / Practical',
+    description: 'Intermediate technical, practical scenarios & project questions.',
   },
   hard: {
-    label: 'Hard',
+    label: 'HARD',
+    badge: '10 Qs',
     questionsCount: 10,
-    description: 'High-level technical, deep architecture & scenario problem-solving.',
+    tagline: 'Advanced / High-Level',
+    description: 'Deep architecture, complex scenario problem-solving & depth.',
   },
 };
 
@@ -126,6 +132,7 @@ function InterviewSetupPage() {
     try {
       const targetQuestions = difficultyConfig[difficulty]?.questionsCount || 7;
       const data = await startInterview({
+        level: difficulty,
         difficulty,
         totalQuestions: targetQuestions,
         resumeText,
@@ -139,22 +146,23 @@ function InterviewSetupPage() {
   };
 
   return (
-    <main className="page">
+    <main className="page setup-page">
       <section className="setup-header">
-        <p className="eyebrow">Preparation module</p>
-        <h1>Configure your interview experience</h1>
-        <p>Upload your resume to generate tailored questions, then choose your interview depth.</p>
+        <p className="eyebrow">AI Mock Preparation</p>
+        <h1>Configure Your Interview</h1>
+        <p>Upload your resume to extract skills, then select your interview difficulty level.</p>
         <div className="step-rail">
           <div className={`step-dot ${step >= 1 ? 'active' : ''}`}>1</div>
+          <div className="step-line" />
           <div className={`step-dot ${step >= 2 ? 'active' : ''}`}>2</div>
         </div>
       </section>
 
       <section className="setup-layout">
         <section className="setup-card">
-          <div className="section-header">
-            <h2>{step === 1 ? 'Upload Your Resume' : 'Choose Interview Depth'}</h2>
-            <span>Step {step} of 2</span>
+          <div className="section-header setup-card-header">
+            <h2>{step === 1 ? 'Upload Your Resume' : 'Select Interview Level'}</h2>
+            <span className="step-badge">Step {step} of 2</span>
           </div>
 
           {step === 1 && (
@@ -165,12 +173,13 @@ function InterviewSetupPage() {
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
               >
+                <div className="dropzone-icon">📁</div>
                 <p className="dropzone-title">
-                  {uploading ? 'Analyzing resume...' : 'Drag & drop your resume here'}
+                  {uploading ? 'Analyzing resume skills...' : 'Drag & drop your resume file'}
                 </p>
-                <p className="dropzone-hint">Supported formats: PDF, DOC, DOCX, TXT (Max 10MB)</p>
+                <p className="dropzone-hint">Supports PDF, DOC, DOCX, TXT (Up to 10MB)</p>
                 <label className="primary-button browse-btn">
-                  <span>{uploading ? 'Processing...' : 'Browse / Upload File'}</span>
+                  <span>{uploading ? 'Analyzing...' : 'Browse / Upload Resume'}</span>
                   <input
                     type="file"
                     accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
@@ -187,7 +196,7 @@ function InterviewSetupPage() {
                     <span className="file-icon">📄</span>
                     <div>
                       <strong>{resumeFileName}</strong>
-                      <p className="file-status">Resume parsed & ready</p>
+                      <p className="file-status">✓ Skills extracted & ready</p>
                     </div>
                   </div>
                   <button
@@ -196,14 +205,14 @@ function InterviewSetupPage() {
                     onClick={handleRemoveResume}
                     disabled={uploading}
                   >
-                    Remove / Change File
+                    Change File
                   </button>
                 </div>
               )}
 
               {resumeSkills.length > 0 && (
                 <div className="skills-extracted-panel">
-                  <p className="skills-heading">Extracted Skills & Tech Stack:</p>
+                  <p className="skills-heading">Extracted Candidate Skills:</p>
                   <div className="skills-chips">
                     {resumeSkills.map((skill) => (
                       <span key={skill} className="skill-chip">
@@ -217,8 +226,10 @@ function InterviewSetupPage() {
           )}
 
           {step === 2 && (
-            <div className="depth-option-container">
-              <div className="option-grid depth-grid">
+            <div className="depth-selection-wrapper">
+              <p className="depth-subtitle">Choose your interview difficulty level</p>
+
+              <div className="depth-grid-3col">
                 {Object.keys(difficultyConfig).map((key) => {
                   const conf = difficultyConfig[key];
                   const isSelected = difficulty === key;
@@ -226,14 +237,15 @@ function InterviewSetupPage() {
                     <button
                       key={key}
                       type="button"
-                      className={`option-card depth-card ${isSelected ? 'selected' : ''}`}
+                      className={`depth-card-item ${isSelected ? 'active-depth' : ''}`}
                       onClick={() => setDifficulty(key)}
                     >
-                      <div className="depth-card-header">
-                        <span className="option-title">{conf.label}</span>
-                        <span className="badge-count">{conf.questionsCount} Questions</span>
+                      <div className="depth-card-top">
+                        <span className="depth-title">{conf.label}</span>
+                        <span className="depth-qs-badge">{conf.badge}</span>
                       </div>
-                      <p className="option-meta">{conf.description}</p>
+                      <span className="depth-tagline">{conf.tagline}</span>
+                      <p className="depth-desc">{conf.description}</p>
                     </button>
                   );
                 })}
@@ -241,7 +253,7 @@ function InterviewSetupPage() {
             </div>
           )}
 
-          <div className="row-actions setup-actions">
+          <div className="setup-action-row">
             {step === 2 && (
               <button
                 type="button"
@@ -256,62 +268,62 @@ function InterviewSetupPage() {
             {step === 1 ? (
               <button
                 type="button"
-                className="primary-button"
+                className="primary-button continue-depth-btn"
                 onClick={handleNextStep}
                 disabled={uploading || !resumeText}
               >
-                Continue to Depth
+                Continue to Depth →
               </button>
             ) : (
               <button
                 type="button"
-                className="primary-button"
+                className="primary-button start-interview-btn"
                 onClick={handleStartInterview}
                 disabled={starting}
               >
-                {starting ? 'Generating interview questions...' : 'Start Interview'}
+                {starting ? 'Generating Resume Questions...' : 'Start Interview'}
               </button>
             )}
           </div>
         </section>
 
         <aside className="setup-side-card">
-          <p className="eyebrow">Session preview</p>
-          <h3>InterviewMate AI interviewer</h3>
+          <p className="eyebrow">Session Overview</p>
+          <h3>InterviewMate AI</h3>
 
           <div className="setup-side-row">
             <span>Resume</span>
-            <strong>{resumeFileName ? 'Uploaded' : 'Required'}</strong>
+            <strong>{resumeFileName ? 'Uploaded ✓' : 'Required'}</strong>
           </div>
 
           {resumeSkills.length > 0 && (
             <div className="setup-side-row">
-              <span>Primary Skills</span>
+              <span>Detected Skills</span>
               <strong>{resumeSkills.slice(0, 3).join(', ')}</strong>
             </div>
           )}
 
           <div className="setup-side-row">
-            <span>Interview Depth</span>
+            <span>Selected Level</span>
             <strong>{difficultyConfig[difficulty]?.label}</strong>
           </div>
 
           <div className="setup-side-row">
             <span>Total Questions</span>
-            <strong>{difficultyConfig[difficulty]?.questionsCount}</strong>
+            <strong>{difficultyConfig[difficulty]?.questionsCount} Qs</strong>
           </div>
 
           <button
             type="button"
             className="primary-button side-start-btn"
-            onClick={handleStartInterview}
+            onClick={step === 1 ? handleNextStep : handleStartInterview}
             disabled={!resumeText || starting}
           >
-            {starting ? 'Generating questions...' : 'Begin Interview'}
+            {starting ? 'Generating questions...' : step === 1 ? 'Continue to Depth' : 'Start Interview'}
           </button>
 
           <p className="hint-text">
-            Questions will be generated directly from your resume skills and selected difficulty.
+            Questions are generated strictly from your uploaded resume skills and selected difficulty.
           </p>
         </aside>
       </section>
