@@ -13,7 +13,10 @@ export const getResume = async () => {
 };
 
 export const startInterview = async (payload) => {
-  const response = await API.post('/interview/start', payload);
+  const response = await API.post('/interview/start', {
+    role: 'Candidate',
+    ...payload,
+  });
   return response.data.data;
 };
 
