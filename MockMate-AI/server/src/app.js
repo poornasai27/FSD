@@ -7,10 +7,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps or curl) or any origin
-      callback(null, true);
-    },
+    origin: true,
     credentials: true,
   })
 );
