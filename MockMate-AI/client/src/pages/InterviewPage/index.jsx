@@ -161,8 +161,8 @@ function InterviewPage() {
           </article>
           <article className="side-card">
             <p className="eyebrow">Interview context</p>
-            <p>Role: {interview?.role || 'Interview'}</p>
-            <p>Difficulty: {interview?.difficulty || 'medium'}</p>
+            <p>Interview Level: {(interview?.difficulty || 'medium').toUpperCase()}</p>
+            <p>Total Questions: {interview?.totalQuestions || 7}</p>
             <p>Mode: {isCodingQuestion ? 'Coding + Voice/Text' : 'Voice/Text'}</p>
           </article>
         </aside>

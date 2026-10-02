@@ -6,7 +6,7 @@ function InterviewCard({ interview, onOpen, onDelete }) {
         <strong>{interview.overallScore ?? '--'}</strong>
       </div>
       <div className="interview-card-body">
-        <h3>{interview.role}</h3>
+        <h3>{interview.difficulty ? `${interview.difficulty.toUpperCase()} Level Interview` : (interview.role || 'Resume Interview')}</h3>
         <p>Questions answered: {interview.currentQuestion}/{interview.totalQuestions}</p>
       </div>
       <div className="card-actions">

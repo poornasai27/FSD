@@ -44,20 +44,20 @@ const getQuestionCountByDifficulty = (difficulty) => {
   return 7; // medium
 };
 
-const createQuestions = async (role, resumeText, totalQuestions, difficulty) => {
+const createQuestions = async (resumeText, totalQuestions, difficulty) => {
   try {
     const response = await askGemini(
-      GENERATE_QUESTIONS_PROMPT(role, resumeText, totalQuestions, difficulty)
+      GENERATE_QUESTIONS_PROMPT(resumeText, totalQuestions, difficulty)
     );
     const parsed = parseGeminiJSON(response);
     return parsed.questions;
   } catch (_error) {
-    return buildFallbackQuestions(role, resumeText, totalQuestions);
+    return buildFallbackQuestions('Candidate', resumeText, totalQuestions);
   }
 };
 
-const normalizeQuestions = (questions = [], role, resumeText, totalQuestions) => {
-  const backup = buildFallbackQuestions(role, resumeText, totalQuestions);
+const normalizeQuestions = (questions = [], resumeText, totalQuestions) => {
+  const backup = buildFallbackQuestions('Candidate', resumeText, totalQuestions);
 
   return questions.map((question, index) => {
     const safeText = sanitizeInterviewQuestionText(question?.text || '');
@@ -73,27 +73,27 @@ const normalizeQuestions = (questions = [], role, resumeText, totalQuestions) =>
   });
 };
 
-const createGreeting = async (role) => {
+const createGreeting = async () => {
   try {
-    return await askGemini(INTERVIEW_GREETING_PROMPT(role));
+    return await askGemini(INTERVIEW_GREETING_PROMPT());
   } catch (_error) {
-    return buildFallbackGreeting(role);
+    return buildFallbackGreeting();
   }
 };
 
-const createTransition = async (role, messages, nextQuestion) => {
+const createTransition = async (messages, nextQuestion) => {
   try {
     return await askGemini(
-      FOLLOW_UP_PROMPT(role, buildConversationHistory(messages), nextQuestion)
+      FOLLOW_UP_PROMPT(buildConversationHistory(messages), nextQuestion)
     );
   } catch (_error) {
     return buildFallbackTransition(nextQuestion);
   }
 };
 
-const createCodeEvaluation = async (role, question, code, language) => {
+const createCodeEvaluation = async (question, code, language) => {
   try {
-    const response = await askGemini(EVALUATE_CODE_PROMPT(role, question, code, language));
+    const response = await askGemini(EVALUATE_CODE_PROMPT('Candidate', question, code, language));
     return parseGeminiJSON(response);
   } catch (_error) {
     return buildFallbackCodeEvaluation(code);
@@ -127,7 +127,7 @@ const buildFeedback = async (interview) => {
     .join('\n\n');
 
   try {
-    const response = await askGemini(FEEDBACK_PROMPT(interview.role, transcript, codeSummary));
+    const response = await askGemini(FEEDBACK_PROMPT('Candidate', transcript, codeSummary));
     return parseGeminiJSON(response);
   } catch (_error) {
     return buildFallbackFeedback(interview.messages, interview.codeSubmissions);
@@ -136,18 +136,16 @@ const buildFeedback = async (interview) => {
 
 export const startInterview = async ({
   userId,
-  role = 'Candidate',
   difficulty = 'medium',
+  level,
   resumeText,
-  totalQuestions,
 }) => {
-  const targetQuestionsCount = getQuestionCountByDifficulty(difficulty);
-  const effectiveRole = role && role !== 'Select your target' ? role : 'Technical Candidate';
+  const selectedDifficulty = level || difficulty || 'medium';
+  const targetQuestionsCount = getQuestionCountByDifficulty(selectedDifficulty);
 
-  const generatedQuestions = await createQuestions(effectiveRole, resumeText, targetQuestionsCount, difficulty);
+  const generatedQuestions = await createQuestions(resumeText, targetQuestionsCount, selectedDifficulty);
   const safeGeneratedQuestions = normalizeQuestions(
     generatedQuestions,
-    effectiveRole,
     resumeText,
     targetQuestionsCount
   );
@@ -160,15 +158,15 @@ export const startInterview = async ({
     ...safeGeneratedQuestions,
   ].slice(0, targetQuestionsCount);
 
-  const greeting = (await createGreeting(role))?.trim() || buildFallbackGreeting(role);
+  const greeting = (await createGreeting())?.trim() || buildFallbackGreeting();
   const introAudio = await safeGenerateAudio(greeting);
-  const firstQuestionText = questions[0]?.text?.trim() || 'Tell me about yourself.';
+  const firstQuestionText = questions[0]?.text?.trim() || 'Tell me about yourself and your technical background.';
 
   const interview = await Interview.create({
     userId,
-    role,
-    difficulty,
-    totalQuestions,
+    role: `${selectedDifficulty.toUpperCase()} Level Resume Interview`,
+    difficulty: selectedDifficulty,
+    totalQuestions: targetQuestionsCount,
     currentQuestion: 1,
     questions,
     messages: [
@@ -246,7 +244,6 @@ export const submitAnswer = async (interviewId, userId, answerText) => {
   const nextQuestionNumber = interview.currentQuestion + 1;
   const nextQuestion = interview.questions[currentIndex + 1];
   const transitionText = await createTransition(
-    interview.role,
     interview.messages,
     nextQuestion.text
   );
@@ -276,7 +273,6 @@ export const submitCode = async (interviewId, userId, code, language = 'javascri
   const currentIndex = interview.currentQuestion - 1;
   const question = interview.questions[currentIndex];
   const evaluation = await createCodeEvaluation(
-    interview.role,
     question?.text || 'Coding challenge',
     code,
     language

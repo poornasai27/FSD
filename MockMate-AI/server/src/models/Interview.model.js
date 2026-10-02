@@ -60,7 +60,7 @@ const interviewSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      required: true,
+      default: 'Resume Interview',
     },
     difficulty: {
       type: String,

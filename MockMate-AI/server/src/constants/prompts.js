@@ -1,7 +1,7 @@
-export const GENERATE_QUESTIONS_PROMPT = (role, resumeText, totalQuestions, difficulty = 'medium') => `You are an expert technical interviewer conducting a mock interview.
+export const GENERATE_QUESTIONS_PROMPT = (resumeText, totalQuestions, difficulty = 'medium') => `You are an expert technical interviewer conducting a resume-based mock interview.
 Target difficulty level: ${difficulty.toUpperCase()}.
 Analyze the candidate resume below and generate exactly ${totalQuestions - 1} interview questions.
-The FIRST question "Tell me about yourself and your experience" is already added, so do not include it.
+The FIRST question "Tell me about yourself and your technical background" is already added, so do not include it.
 
 Return strict JSON in this format:
 {
@@ -15,24 +15,25 @@ Return strict JSON in this format:
 }
 
 Rules:
-1. Tailor questions DIRECTLY to the skills, programming languages, frameworks, tools, and projects in the resume.
-2. If resume mentions e.g. Python, React, MongoDB, ask questions on those technologies. If Java, AWS, Spring Boot, ask on those instead.
-3. Difficulty setting:
+1. Tailor questions DIRECTLY and ONLY to the skills, programming languages, frameworks, databases, tools, and projects mentioned in the candidate resume.
+2. Example: If the resume contains Python, React, Node.js, MongoDB, SQL -> generate questions around those exact technologies. If the resume contains Java, Spring Boot, MySQL, AWS -> generate questions around those technologies instead.
+3. DO NOT use generic role templates or ask for a target role.
+4. Difficulty setting:
    - EASY: basic fundamental concepts and simple resume/project questions.
    - MEDIUM: moderate technical questions, practical scenario reasoning, and resume-based problem solving.
    - HARD: high-level architecture, deep skill questions, complex scenario problem-solving, and advanced technical depth.
-4. Include at least 1 coding question.
-5. Each question must be concise (max 35 words).
-6. Never paste raw contact details, links, phone numbers, or emails.
+5. Include at least 1 coding question.
+6. Each question must be concise (max 35 words).
+7. Never paste raw contact details, links, phone numbers, or emails.
 
 Resume:
 ${resumeText}`;
 
-export const INTERVIEW_GREETING_PROMPT = (role) => `You are InterviewMate AI, a warm but professional AI technical interviewer.
-Create a short greeting for a ${role} mock interview. Mention that the first question is "Tell me about yourself".
-Keep it under 60 words.`;
+export const INTERVIEW_GREETING_PROMPT = () => `You are InterviewMate AI, a warm but professional AI technical interviewer.
+Create a short greeting for a resume-based mock interview. Mention that the first question is "Tell me about yourself and your technical background".
+Keep it under 50 words.`;
 
-export const FOLLOW_UP_PROMPT = (role, conversationHistory, nextQuestion) => `You are InterviewMate AI, a ${role} interviewer.
+export const FOLLOW_UP_PROMPT = (conversationHistory, nextQuestion) => `You are InterviewMate AI, conducting a technical interview.
 Use the conversation history to give a short, natural transition into the next question.
 Keep it concise and conversational.
 
